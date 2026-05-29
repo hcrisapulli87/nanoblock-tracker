@@ -19,9 +19,10 @@ describe('SetGrid', () => {
   })
 
   it('filters by name search (case-insensitive)', () => {
-    render(<SetGrid catalog={CATALOG} ownedIds={ownedIds} filters={{ ...allFilters, search: 'bulba' }} onCardClick={vi.fn()} />)
+    // Dragonite only has one set (NBPM-011) — unambiguous search
+    render(<SetGrid catalog={CATALOG} ownedIds={ownedIds} filters={{ ...allFilters, search: 'dragonit' }} onCardClick={vi.fn()} />)
     expect(screen.getAllByRole('button').length).toBe(1)
-    expect(screen.getByText('Bulbasaur')).toBeInTheDocument()
+    expect(screen.getByText('Dragonite')).toBeInTheDocument()
   })
 
   it('filters by generation', () => {

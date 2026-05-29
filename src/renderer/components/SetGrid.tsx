@@ -23,8 +23,9 @@ function applyFilters(catalog: NanoblockSet[], ownedIds: Set<string>, filters: S
   if (filters.generation > 0) sets = sets.filter(s => s.generation === filters.generation)
 
   return [...sets].sort((a, b) => {
+    if (filters.sort === 'code-asc')    return a.id.localeCompare(b.id)
     if (filters.sort === 'number-desc') return b.pokemonNumber - a.pokemonNumber
-    if (filters.sort === 'name-asc') return a.pokemonName.localeCompare(b.pokemonName)
+    if (filters.sort === 'name-asc')    return a.pokemonName.localeCompare(b.pokemonName)
     return a.pokemonNumber - b.pokemonNumber
   })
 }

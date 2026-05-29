@@ -4,7 +4,7 @@ export interface SidebarFilters {
   search: string
   status: 'all' | 'owned' | 'missing'
   generation: number  // 0 = all
-  sort: 'number-asc' | 'number-desc' | 'name-asc'
+  sort: 'number-asc' | 'number-desc' | 'name-asc' | 'code-asc'
 }
 
 interface Props {
@@ -17,7 +17,11 @@ const GENERATIONS = [
   { label: 'Gen 1', value: 1 },
   { label: 'Gen 2', value: 2 },
   { label: 'Gen 3', value: 3 },
-  { label: 'Gen 4+', value: 4 },
+  { label: 'Gen 4', value: 4 },
+  { label: 'Gen 6', value: 6 },
+  { label: 'Gen 7', value: 7 },
+  { label: 'Gen 8', value: 8 },
+  { label: 'Gen 9', value: 9 },
 ]
 
 const STATUSES: { label: string; value: SidebarFilters['status'] }[] = [
@@ -27,6 +31,7 @@ const STATUSES: { label: string; value: SidebarFilters['status'] }[] = [
 ]
 
 const SORTS: { label: string; value: SidebarFilters['sort'] }[] = [
+  { label: 'Collection #', value: 'code-asc' },
   { label: 'Pokédex # ↑', value: 'number-asc' },
   { label: 'Pokédex # ↓', value: 'number-desc' },
   { label: 'Name A–Z', value: 'name-asc' },

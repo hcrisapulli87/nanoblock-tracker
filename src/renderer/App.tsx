@@ -13,7 +13,7 @@ const DEFAULT_FILTERS: SidebarFilters = {
   search: '',
   status: 'all',
   generation: 0,
-  sort: 'number-asc',
+  sort: 'code-asc',
 }
 
 function DetailPane({ set, entry, onClose, onUpdate, onRemove, onMarkOwned }: {
