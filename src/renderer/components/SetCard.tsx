@@ -23,7 +23,7 @@ export function SetCard({ set, isOwned, onClick }: Props) {
         />
       </div>
       <div className="set-card__info">
-        <span className="set-card__number">#{String(set.pokemonNumber).padStart(3, '0')}</span>
+        <span className="set-card__number">{set.setCode}</span>
         <span className="set-card__name">{set.pokemonName}</span>
         <span className={`set-card__status ${isOwned ? 'set-card__status--owned' : 'set-card__status--missing'}`}>
           {isOwned ? '✓ Owned' : 'Missing'}
