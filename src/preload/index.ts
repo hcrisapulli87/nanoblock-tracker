@@ -1,22 +1,20 @@
-import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge, ipcRenderer } from 'electron'
+import { IPC } from '../shared/types'
+import type { CollectionEntry } from '../shared/types'
 
-// Custom APIs for renderer
-const api = {}
-
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
-}
+contextBridge.exposeInMainWorld('electronAPI', {
+  getCollection: () =>
+    ipcRenderer.invoke(IPC.GET_COLLECTION),
+  addToCollection: (entry: CollectionEntry) =>
+    ipcRenderer.invoke(IPC.ADD_TO_COLLECTION, entry),
+  updateCollectionEntry: (entry: CollectionEntry) =>
+    ipcRenderer.invoke(IPC.UPDATE_COLLECTION_ENTRY, entry),
+  removeFromCollection: (setId: string) =>
+    ipcRenderer.invoke(IPC.REMOVE_FROM_COLLECTION, setId),
+  fetchEbayPrices: (pokemonName: string) =>
+    ipcRenderer.invoke(IPC.FETCH_EBAY_PRICES, pokemonName),
+  fetchNanoblockPrice: (pokemonName: string) =>
+    ipcRenderer.invoke(IPC.FETCH_NANOBLOCK_PRICE, pokemonName),
+  openExternal: (url: string) =>
+    ipcRenderer.invoke(IPC.OPEN_EXTERNAL, url),
+})
