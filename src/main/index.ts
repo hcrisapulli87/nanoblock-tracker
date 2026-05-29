@@ -15,6 +15,10 @@ async function createWindow(): Promise<void> {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      // webSecurity:false disables CORP/CORS enforcement in the renderer,
+      // allowing the Merlinsbricks CDN product images to load.
+      // Safe for a local personal-use desktop app with no web-facing surface.
+      webSecurity: false,
     },
   })
 
