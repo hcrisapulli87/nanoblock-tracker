@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, shell, session } from 'electron'
 import { join } from 'path'
 import initSqlJs from 'sql.js'
 import * as fs from 'fs'
@@ -48,6 +48,23 @@ async function initDatabase() {
 }
 
 app.whenReady().then(async () => {
+  // The Merlinsbricks CDN sends `Cross-Origin-Resource-Policy: same-site` which
+  // blocks Electron (a non-web origin) from loading their images.
+  // We strip that header only for cdn.merlinsbricks.com requests so the
+  // product photos can display. This is safe — it only affects this local app.
+  session.defaultSession.webRequest.onHeadersReceived(
+    { urls: ['https://cdn.merlinsbricks.com/*'] },
+    (details, callback) => {
+      const headers = { ...details.responseHeaders }
+      for (const key of Object.keys(headers)) {
+        if (key.toLowerCase() === 'cross-origin-resource-policy') {
+          delete headers[key]
+        }
+      }
+      callback({ responseHeaders: headers })
+    }
+  )
+
   const { db, dbPath } = await initDatabase()
 
   // Wrap db.run to auto-persist after every write
