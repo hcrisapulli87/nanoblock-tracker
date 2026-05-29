@@ -13,7 +13,7 @@ declare global {
       removeFromCollection: (setId: string) => Promise<void>
       fetchEbayPrices: (pokemonName: string) => Promise<IpcResult<EbayPriceData>>
       fetchNanoblockPrice: (pokemonName: string) => Promise<IpcResult<number>>
-      openExternal: (url: string) => void
+      openExternal: (url: string) => Promise<void>
     }
   }
 }
