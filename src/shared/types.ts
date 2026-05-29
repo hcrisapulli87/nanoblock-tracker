@@ -8,10 +8,11 @@ export interface NanoblockSet {
 }
 
 export interface CollectionEntry {
+  // setId is the primary key — one row per owned set
   setId: string
   condition: 'sealed' | 'built' | 'loose'
   notes: string
-  dateAdded: string
+  dateAdded: string  // ISO date string, e.g. "2024-01-01"
 }
 
 export interface EbayPriceData {
@@ -21,12 +22,11 @@ export interface EbayPriceData {
   currency: string
 }
 
-export interface PriceResult {
-  source: 'ebay' | 'nanoblock'
-  status: 'loading' | 'success' | 'error' | 'not-found'
-  data?: EbayPriceData | number
-  errorMessage?: string
-}
+export type PriceResult =
+  | { source: 'ebay' | 'nanoblock'; status: 'loading' }
+  | { source: 'ebay' | 'nanoblock'; status: 'success'; data: EbayPriceData | number }
+  | { source: 'ebay' | 'nanoblock'; status: 'error'; errorMessage: string }
+  | { source: 'ebay' | 'nanoblock'; status: 'not-found' }
 
 export const IPC = {
   GET_COLLECTION: 'collection:get',
