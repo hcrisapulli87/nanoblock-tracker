@@ -38,6 +38,11 @@ export function registerIpcHandlers(db: Database): void {
   })
 
   ipcMain.handle(IPC.OPEN_EXTERNAL, (_event, url: string) => {
+    const allowed = ['https://', 'http://']
+    if (!allowed.some(scheme => url.startsWith(scheme))) {
+      console.warn(`Blocked openExternal with disallowed scheme: ${url}`)
+      return
+    }
     shell.openExternal(url)
   })
 }

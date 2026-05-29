@@ -8,10 +8,13 @@ export function usePriceLookup(pokemonName: string) {
   useEffect(() => {
     if (!pokemonName) return
 
+    let cancelled = false
+
     setEbay({ source: 'ebay', status: 'loading' })
     setNanoblock({ source: 'nanoblock', status: 'loading' })
 
     window.electronAPI.fetchEbayPrices(pokemonName).then(res => {
+      if (cancelled) return
       if (res.ok) {
         setEbay({ source: 'ebay', status: 'success', data: res.data as EbayPriceData })
       } else {
@@ -20,12 +23,15 @@ export function usePriceLookup(pokemonName: string) {
     })
 
     window.electronAPI.fetchNanoblockPrice(pokemonName).then(res => {
+      if (cancelled) return
       if (res.ok) {
         setNanoblock({ source: 'nanoblock', status: 'success', data: res.data as number })
       } else {
         setNanoblock({ source: 'nanoblock', status: 'error', errorMessage: res.message })
       }
     })
+
+    return () => { cancelled = true }
   }, [pokemonName])
 
   return { ebay, nanoblock }
