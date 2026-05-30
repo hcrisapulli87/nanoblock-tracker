@@ -5,7 +5,7 @@ import { CATALOG } from '../../../src/renderer/data/catalog'
 import type { SidebarFilters } from '../../../src/renderer/components/Sidebar'
 
 const ownedIds = new Set(['NBPM-001', 'NBPM-004'])
-const allFilters: SidebarFilters = { search: '', status: 'all', generation: 0, sort: 'number-asc' }
+const allFilters: SidebarFilters = { search: '', status: 'all', generation: 0, series: 'all', sort: 'number-asc' }
 
 describe('SetGrid', () => {
   it('renders a card for every set in the catalog', () => {

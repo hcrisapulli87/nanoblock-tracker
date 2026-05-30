@@ -13,6 +13,7 @@ const DEFAULT_FILTERS: SidebarFilters = {
   search: '',
   status: 'all',
   generation: 0,
+  series: 'all',
   sort: 'code-asc',
 }
 

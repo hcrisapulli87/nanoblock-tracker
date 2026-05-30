@@ -4,6 +4,7 @@ export interface SidebarFilters {
   search: string
   status: 'all' | 'owned' | 'missing'
   generation: number  // 0 = all
+  series: 'all' | 'standard' | 'deluxe' | 'rs'
   sort: 'number-asc' | 'number-desc' | 'name-asc' | 'code-asc'
 }
 
@@ -28,6 +29,13 @@ const STATUSES: { label: string; value: SidebarFilters['status'] }[] = [
   { label: 'All Sets', value: 'all' },
   { label: 'Owned', value: 'owned' },
   { label: 'Missing', value: 'missing' },
+]
+
+const SERIES: { label: string; value: SidebarFilters['series'] }[] = [
+  { label: 'All Types', value: 'all' },
+  { label: 'Standard', value: 'standard' },
+  { label: 'Deluxe / DX', value: 'deluxe' },
+  { label: 'RS Series', value: 'rs' },
 ]
 
 const SORTS: { label: string; value: SidebarFilters['sort'] }[] = [
@@ -69,6 +77,19 @@ export function Sidebar({ filters, onChange }: Props) {
             key={s.value}
             className={`sidebar__filter-btn ${filters.status === s.value ? 'sidebar__filter-btn--active' : ''}`}
             onClick={() => set({ status: s.value })}
+          >
+            {s.label}
+          </button>
+        ))}
+      </section>
+
+      <section className="sidebar__section">
+        <h4 className="sidebar__heading">Series</h4>
+        {SERIES.map(s => (
+          <button
+            key={s.value}
+            className={`sidebar__filter-btn ${filters.series === s.value ? 'sidebar__filter-btn--active' : ''}`}
+            onClick={() => set({ series: s.value })}
           >
             {s.label}
           </button>

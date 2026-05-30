@@ -9,6 +9,13 @@ interface Props {
   onCardClick: (set: NanoblockSet) => void
 }
 
+function seriesOf(set: NanoblockSet): 'deluxe' | 'rs' | 'standard' {
+  if (set.id.startsWith('NBPM-R')) return 'rs'
+  const name = set.pokemonName.toLowerCase()
+  if (name.includes('deluxe') || name.includes(' dx)') || name.includes('(dx)')) return 'deluxe'
+  return 'standard'
+}
+
 function applyFilters(catalog: NanoblockSet[], ownedIds: Set<string>, filters: SidebarFilters): NanoblockSet[] {
   let sets = catalog
 
@@ -19,6 +26,8 @@ function applyFilters(catalog: NanoblockSet[], ownedIds: Set<string>, filters: S
 
   if (filters.status === 'owned') sets = sets.filter(s => ownedIds.has(s.id))
   if (filters.status === 'missing') sets = sets.filter(s => !ownedIds.has(s.id))
+
+  if (filters.series !== 'all') sets = sets.filter(s => seriesOf(s) === filters.series)
 
   if (filters.generation > 0) sets = sets.filter(s => s.generation === filters.generation)
 

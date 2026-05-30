@@ -8,6 +8,7 @@ const defaultFilters: SidebarFilters = {
   search: '',
   status: 'all',
   generation: 0,
+  series: 'all',
   sort: 'number-asc',
 }
 
