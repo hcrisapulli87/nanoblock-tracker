@@ -36,4 +36,16 @@ export const IPC = {
   FETCH_EBAY_PRICES: 'prices:ebay',
   FETCH_NANOBLOCK_PRICE: 'prices:nanoblock',
   OPEN_EXTERNAL: 'shell:openExternal',
+  MOBILE_GET_SERVER_STATUS: 'mobile:getServerStatus',
+  MOBILE_GET_TUNNEL_STATUS: 'mobile:getTunnelStatus',
+  MOBILE_GET_TUNNEL_URL: 'mobile:getTunnelUrl',
+  MOBILE_SET_PIN: 'mobile:setPin',
+  MOBILE_SET_TUNNEL_CONFIG: 'mobile:setTunnelConfig',
 } as const
+
+export interface MobileConfig {
+  pinHash: string
+  cookieSecret: string
+  tunnelName: string
+  tunnelUrl: string
+}
