@@ -123,11 +123,20 @@ export function startServer(
     res.json(CATALOG.filter(set => !ownedIds.has(set.id)).map(set => ({ ...set, owned: false })))
   })
 
-  return app.listen(port)
+  const server = app.listen(port)
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`[mobile] Port ${port} already in use — server not started`)
+    } else {
+      console.error('[mobile] Server error:', err)
+    }
+  })
+  return server
 }
 
 export function stopServer(server: http.Server): Promise<void> {
-  return new Promise((resolve, reject) => {
-    server.close(err => (err ? reject(err) : resolve()))
+  return new Promise(resolve => {
+    if (!server.listening) { resolve(); return }
+    server.close(() => resolve())
   })
 }
