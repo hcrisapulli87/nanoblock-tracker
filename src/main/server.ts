@@ -1,6 +1,6 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
-import { createHash } from 'crypto'
+import { createHash, timingSafeEqual } from 'crypto'
 import type * as http from 'http'
 import type { Database } from 'sql.js'
 import type { MobileConfig } from '../shared/types'
@@ -9,8 +9,40 @@ import { getCollection } from './db'
 
 export const DEFAULT_PORT = 45678
 
+const MAX_ATTEMPTS = 5
+const LOCKOUT_MS = 60_000
+
+interface FailEntry { count: number; lockedUntil: number }
+const failedAttempts = new Map<string, FailEntry>()
+
+function isRateLimited(ip: string): boolean {
+  const e = failedAttempts.get(ip)
+  if (!e) return false
+  if (Date.now() < e.lockedUntil) return true
+  if (e.lockedUntil > 0) { failedAttempts.delete(ip); return false }
+  return false
+}
+
+function recordFailure(ip: string): void {
+  const e = failedAttempts.get(ip) ?? { count: 0, lockedUntil: 0 }
+  e.count++
+  if (e.count >= MAX_ATTEMPTS) e.lockedUntil = Date.now() + LOCKOUT_MS
+  failedAttempts.set(ip, e)
+}
+
+function clearFailures(ip: string): void {
+  failedAttempts.delete(ip)
+}
+
 function hashPin(pin: string): string {
   return createHash('sha256').update(pin).digest('hex')
+}
+
+function verifyPin(input: string, storedHash: string): boolean {
+  if (!storedHash || storedHash.length !== 64) return false
+  const a = Buffer.from(hashPin(input), 'hex')
+  const b = Buffer.from(storedHash, 'hex')
+  return timingSafeEqual(a, b)
 }
 
 export function startServer(
@@ -38,20 +70,31 @@ export function startServer(
   }
 
   app.post('/api/auth', (req, res) => {
+    const ip = req.ip ?? 'unknown'
     const { pin } = req.body as { pin?: string }
+
     if (!pin || !config.pinHash) {
       res.status(401).json({ error: 'No PIN configured' })
       return
     }
-    if (hashPin(pin) === config.pinHash) {
+
+    if (isRateLimited(ip)) {
+      res.status(429).json({ error: 'Too many attempts. Try again later.' })
+      return
+    }
+
+    if (verifyPin(pin, config.pinHash)) {
+      clearFailures(ip)
       res.cookie('session', 'ok', {
         signed: true,
         httpOnly: true,
         maxAge: 30 * 24 * 60 * 60 * 1000,
         sameSite: 'strict',
+        secure: req.secure || req.get('x-forwarded-proto') === 'https',
       })
       res.json({ ok: true })
     } else {
+      recordFailure(ip)
       res.status(401).json({ error: 'Invalid PIN' })
     }
   })
