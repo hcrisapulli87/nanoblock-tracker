@@ -3,7 +3,7 @@ import { join } from 'path'
 import initSqlJs from 'sql.js'
 import * as fs from 'fs'
 import { createSchema } from './db'
-import { registerIpcHandlers } from './ipc'
+import { registerIpcHandlers, registerMobileIpcHandlers } from './ipc'
 import { loadConfig } from './mobile-config'
 import { startServer, stopServer } from './server'
 import { TunnelManager } from './tunnel'
@@ -102,8 +102,7 @@ app.whenReady().then(async () => {
   }
 
   registerIpcHandlers(db)
-  // registerMobileIpcHandlers wired in Task 9:
-  // registerMobileIpcHandlers(mobileServerInstance, mobileTunnelHolder, config, mobileUserDataPath)
+  registerMobileIpcHandlers(mobileServerInstance, mobileTunnelHolder, config, mobileUserDataPath)
   await createWindow()
 
   app.on('activate', async () => {
