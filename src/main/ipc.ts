@@ -51,6 +51,18 @@ export function registerIpcHandlers(db: Database): void {
   })
 }
 
+const TUNNEL_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9_-]{0,62}$/
+const PIN_RE = /^\d{4,8}$/
+
+function isValidHttpsUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw)
+    return u.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 export function registerMobileIpcHandlers(
   server: http.Server,
   tunnelHolder: { value: TunnelManager | null },
@@ -70,7 +82,10 @@ export function registerMobileIpcHandlers(
     url: config.tunnelUrl,
   }))
 
-  ipcMain.handle(IPC.MOBILE_SET_PIN, (_event, pin: string) => {
+  ipcMain.handle(IPC.MOBILE_SET_PIN, (_event, pin: unknown) => {
+    if (typeof pin !== 'string' || !PIN_RE.test(pin)) {
+      return { success: false, error: 'PIN must be 4–8 digits' }
+    }
     config.pinHash = createHash('sha256').update(pin).digest('hex')
     saveConfig(config, userDataPath)
     return { success: true }
@@ -79,11 +94,17 @@ export function registerMobileIpcHandlers(
   ipcMain.handle(
     IPC.MOBILE_SET_TUNNEL_CONFIG,
     (_event, args: { tunnelName: string; tunnelUrl: string }) => {
+      if (typeof args?.tunnelName !== 'string' || !TUNNEL_NAME_RE.test(args.tunnelName)) {
+        return { success: false, error: 'Invalid tunnel name' }
+      }
+      if (typeof args?.tunnelUrl !== 'string' || !isValidHttpsUrl(args.tunnelUrl)) {
+        return { success: false, error: 'tunnelUrl must be a valid https:// URL' }
+      }
       tunnelHolder.value?.stop()
       config.tunnelName = args.tunnelName
       config.tunnelUrl = args.tunnelUrl
       saveConfig(config, userDataPath)
-      tunnelHolder.value = args.tunnelName ? new TunnelManager(args.tunnelName) : null
+      tunnelHolder.value = new TunnelManager(args.tunnelName)
       return { success: true }
     }
   )

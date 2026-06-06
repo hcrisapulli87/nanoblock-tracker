@@ -31,7 +31,7 @@ describe('TunnelManager', () => {
 
     const mgr = new TunnelManager('nanoblock')
     expect(mgr.status).toBe('connecting')
-    expect(spawn).toHaveBeenCalledWith('cloudflared', ['tunnel', 'run', 'nanoblock'], expect.any(Object))
+    expect(spawn).toHaveBeenCalledWith('cloudflared', ['tunnel', 'run', '--', 'nanoblock'], expect.any(Object))
   })
 
   it('transitions to connected when stdout contains registration message', () => {
