@@ -8,6 +8,7 @@ import type { SidebarFilters } from './components/Sidebar'
 import { SetGrid } from './components/SetGrid'
 import { SetDetail } from './components/SetDetail'
 import { ProgressBar } from './components/ProgressBar'
+import { MobileAccessPanel } from './components/MobileAccessPanel'
 
 const DEFAULT_FILTERS: SidebarFilters = {
   search: '',
@@ -26,7 +27,7 @@ function DetailPane({ set, entry, onClose, onUpdate, onRemove, onMarkOwned }: {
   onMarkOwned: (e: CollectionEntry) => void
 }) {
   // Only fetch prices for missing sets (entry === null)
-  const { ebay, nanoblock } = usePriceLookup(entry ? '' : set.pokemonName)
+  const { ebay, nanoblock } = usePriceLookup(entry ? '' : set.pokemonName, entry ? '' : set.setCode)
   return (
     <SetDetail
       set={set}
@@ -46,6 +47,7 @@ export default function App() {
   const { entries, ownedIds, addEntry, updateEntry, removeEntry } = useCollection()
   const [filters, setFilters] = useState<SidebarFilters>(DEFAULT_FILTERS)
   const [selectedSet, setSelectedSet] = useState<NanoblockSet | null>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   const selectedEntry = selectedSet
     ? entries.find(e => e.setId === selectedSet.id) ?? null
@@ -56,6 +58,14 @@ export default function App() {
       <header className="app__header">
         <h1 className="app__title">Pokémon Nanoblock Tracker</h1>
         <ProgressBar owned={ownedIds.size} total={CATALOG.length} />
+        <button
+          className="mobile-btn"
+          aria-label="Mobile"
+          onClick={() => setMobileOpen(true)}
+          style={{ background: 'none', border: '1px solid #2a3a50', borderRadius: 6, color: '#94a3b8', cursor: 'pointer', fontSize: 13, padding: '5px 12px', marginLeft: 12 }}
+        >
+          📱 Mobile
+        </button>
       </header>
       <div className="app__body">
         <Sidebar filters={filters} onChange={setFilters} />
@@ -78,6 +88,7 @@ export default function App() {
           onMarkOwned={addEntry}
         />
       )}
+      {mobileOpen && <MobileAccessPanel onClose={() => setMobileOpen(false)} />}
     </div>
   )
 }
