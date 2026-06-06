@@ -4,6 +4,20 @@ import initSqlJs from 'sql.js'
 import * as fs from 'fs'
 import { createSchema } from './db'
 import { registerIpcHandlers } from './ipc'
+import { loadConfig } from './mobile-config'
+import { startServer, stopServer } from './server'
+import { TunnelManager } from './tunnel'
+import type * as http from 'http'
+
+let mobileServer: http.Server | null = null
+const mobileTunnelHolder: { value: TunnelManager | null } = { value: null }
+let mobileUserDataPath = ''
+
+function getMobileStaticRoot(): string {
+  return app.isPackaged
+    ? join(process.resourcesPath, 'server')
+    : join(process.cwd(), 'resources/server')
+}
 
 async function createWindow(): Promise<void> {
   const win = new BrowserWindow({
@@ -52,10 +66,8 @@ async function initDatabase() {
 }
 
 app.whenReady().then(async () => {
-  // The Merlinsbricks CDN sends `Cross-Origin-Resource-Policy: same-site` which
-  // blocks Electron (a non-web origin) from loading their images.
-  // We strip that header only for cdn.merlinsbricks.com requests so the
-  // product photos can display. This is safe — it only affects this local app.
+  // Strip Cross-Origin-Resource-Policy from Merlinsbricks CDN so product images load.
+  // Merlinsbricks sends CORP: same-site which blocks Electron (non-web origin) from loading images.
   session.defaultSession.webRequest.onHeadersReceived(
     { urls: ['https://cdn.merlinsbricks.com/*'] },
     (details, callback) => {
@@ -69,6 +81,7 @@ app.whenReady().then(async () => {
     }
   )
 
+
   const { db, dbPath } = await initDatabase()
 
   // Wrap db.run to auto-persist after every write
@@ -80,7 +93,17 @@ app.whenReady().then(async () => {
     return result
   }
 
+  mobileUserDataPath = app.getPath('userData')
+  const config = loadConfig(mobileUserDataPath)
+  const mobileServerInstance = startServer(db, config, getMobileStaticRoot())
+  mobileServer = mobileServerInstance
+  if (config.tunnelName) {
+    mobileTunnelHolder.value = new TunnelManager(config.tunnelName)
+  }
+
   registerIpcHandlers(db)
+  // registerMobileIpcHandlers wired in Task 9:
+  // registerMobileIpcHandlers(mobileServerInstance, mobileTunnelHolder, config, mobileUserDataPath)
   await createWindow()
 
   app.on('activate', async () => {
@@ -88,6 +111,8 @@ app.whenReady().then(async () => {
   })
 })
 
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
+  mobileTunnelHolder.value?.stop()
+  if (mobileServer) await stopServer(mobileServer)
   if (process.platform !== 'darwin') app.quit()
 })
