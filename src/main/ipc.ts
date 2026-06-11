@@ -5,6 +5,7 @@ import type * as http from 'http'
 import { IPC } from '../shared/types'
 import type { CollectionEntry, MobileConfig } from '../shared/types'
 import { getCollection, addToCollection, updateCollectionEntry, removeFromCollection } from './db'
+import { scheduleGoogleTasksSync } from './google-tasks-sync'
 import { fetchEbayPrices, EbayError } from './ebay'
 import { fetchNanoblockPrice, ScraperError } from './nanoblock-scraper'
 import { saveConfig } from './mobile-config'
@@ -15,14 +16,17 @@ export function registerIpcHandlers(db: Database): void {
 
   ipcMain.handle(IPC.ADD_TO_COLLECTION, (_event, entry: CollectionEntry) => {
     addToCollection(db, entry)
+    scheduleGoogleTasksSync()
   })
 
   ipcMain.handle(IPC.UPDATE_COLLECTION_ENTRY, (_event, entry: CollectionEntry) => {
     updateCollectionEntry(db, entry)
+    scheduleGoogleTasksSync()
   })
 
   ipcMain.handle(IPC.REMOVE_FROM_COLLECTION, (_event, setId: string) => {
     removeFromCollection(db, setId)
+    scheduleGoogleTasksSync()
   })
 
   ipcMain.handle(IPC.FETCH_EBAY_PRICES, async (_event, pokemonName: string) => {

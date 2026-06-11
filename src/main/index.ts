@@ -5,6 +5,7 @@ import * as fs from 'fs'
 import { createSchema } from './db'
 import { registerIpcHandlers, registerMobileIpcHandlers } from './ipc'
 import { loadConfig } from './mobile-config'
+import { initGoogleTasksSync } from './google-tasks-sync'
 import { startServer, stopServer } from './server'
 import { TunnelManager } from './tunnel'
 import type * as http from 'http'
@@ -104,6 +105,9 @@ app.whenReady().then(async () => {
   registerIpcHandlers(db)
   registerMobileIpcHandlers(mobileServerInstance, mobileTunnelHolder, config, mobileUserDataPath)
   await createWindow()
+
+  // One-way Google Tasks sync (app is source of truth) — never blocks startup
+  initGoogleTasksSync(db, mobileUserDataPath)
 
   app.on('activate', async () => {
     if (BrowserWindow.getAllWindows().length === 0) await createWindow()
