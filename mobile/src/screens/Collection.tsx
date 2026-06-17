@@ -7,6 +7,14 @@ import { useAuth } from '../auth/AuthProvider'
 const CONDITIONS: CollectionEntry['condition'][] = ['sealed', 'built', 'loose']
 const today = () => new Date().toISOString().slice(0, 10)
 
+// The Merlinsbricks CDN sends `Cross-Origin-Resource-Policy: same-site`, which blocks a plain
+// cross-origin <img> on the web. It also sends `Access-Control-Allow-Origin: *`, so loading it
+// as a CORS request (crossOrigin) bypasses CORP. Other hosts (Kawada, Shopify) send no CORP and
+// no CORS header, so they must stay plain — forcing crossOrigin on them would break them.
+function corsFor(url?: string): 'anonymous' | undefined {
+  return url?.includes('cdn.merlinsbricks.com') ? 'anonymous' : undefined
+}
+
 export default function Collection() {
   const { entries, ownedIds, addEntry, updateEntry, removeEntry } = useCollection()
   const { signOut } = useAuth()
@@ -61,6 +69,7 @@ export default function Collection() {
                       src={set.imageUrl}
                       alt=""
                       loading="lazy"
+                      crossOrigin={corsFor(set.imageUrl)}
                       onError={(e) => {
                         e.currentTarget.style.visibility = 'hidden'
                       }}
@@ -129,6 +138,7 @@ function SetSheet({
               <img
                 src={set.imageUrl}
                 alt=""
+                crossOrigin={corsFor(set.imageUrl)}
                 onError={(e) => {
                   e.currentTarget.style.visibility = 'hidden'
                 }}
