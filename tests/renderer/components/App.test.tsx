@@ -1,35 +1,42 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import App from '../../../src/renderer/App'
 
 vi.mock('../../../src/renderer/hooks/useCollection', () => ({
-  useCollection: () => ({ entries: [], ownedIds: new Set(), addEntry: vi.fn(), updateEntry: vi.fn(), removeEntry: vi.fn() }),
+  useCollection: () => ({
+    entries: [],
+    ownedIds: new Set(),
+    addEntry: vi.fn(),
+    updateEntry: vi.fn(),
+    removeEntry: vi.fn(),
+  }),
 }))
 
 vi.mock('../../../src/renderer/hooks/usePriceLookup', () => ({
   usePriceLookup: () => ({ ebay: null, nanoblock: null }),
 }))
 
-window.electronAPI = {
-  ...window.electronAPI,
-  mobileGetServerStatus: vi.fn().mockResolvedValue({ running: true, port: 45678 }),
-  mobileGetTunnelStatus: vi.fn().mockResolvedValue({ status: 'not-configured' }),
-  mobileGetTunnelUrl: vi.fn().mockResolvedValue({ url: '' }),
-  mobileSetPin: vi.fn(),
-  mobileSetTunnelConfig: vi.fn(),
-} as typeof window.electronAPI
+const auth = vi.hoisted(() => ({
+  value: { session: null as unknown, loading: false },
+}))
+vi.mock('../../../src/renderer/auth/AuthProvider', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: () => auth.value,
+}))
 
-describe('App mobile access', () => {
-  it('opens MobileAccessPanel when Mobile button is clicked', () => {
+describe('App auth gate', () => {
+  it('shows the login screen when there is no session', () => {
+    auth.value = { session: null, loading: false }
     render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: /mobile/i }))
-    expect(screen.getByText('Mobile Access')).toBeInTheDocument()
+    expect(screen.getByText('Pokémon Nanoblock Tracker')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/you@example.com/i)).toBeInTheDocument()
   })
 
-  it('closes MobileAccessPanel when close button is clicked', async () => {
+  it('shows the tracker when signed in', () => {
+    auth.value = { session: { user: { id: 'u1' } }, loading: false }
     render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: /mobile/i }))
-    fireEvent.click(screen.getByRole('button', { name: /close/i }))
-    expect(screen.queryByText('Mobile Access')).not.toBeInTheDocument()
+    expect(screen.getByText('Pokémon Nanoblock Tracker')).toBeInTheDocument()
+    // The tracker renders the progress bar / set grid, not the login form.
+    expect(screen.queryByPlaceholderText(/you@example.com/i)).not.toBeInTheDocument()
   })
 })

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0f1923"/>
+  <!-- nanoblock-style studded brick -->
+  <g fill="#7dd3fc">
+    <rect x="136" y="216" width="240" height="150" rx="16"/>
+    <rect x="160" y="180" width="44" height="44" rx="10"/>
+    <rect x="234" y="180" width="44" height="44" rx="10"/>
+    <rect x="308" y="180" width="44" height="44" rx="10"/>
+  </g>
+  <g fill="#0f1923" opacity="0.85">
+    <circle cx="182" cy="202" r="9"/>
+    <circle cx="256" cy="202" r="9"/>
+    <circle cx="330" cy="202" r="9"/>
+  </g>
+</svg>

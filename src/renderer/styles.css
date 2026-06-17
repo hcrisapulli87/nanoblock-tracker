@@ -91,3 +91,14 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: syst
 .price-comparison__links { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .buy-link-btn { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-primary); padding: 7px 6px; border-radius: 4px; font-size: 11px; cursor: pointer; }
 .buy-link-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Auth / login ─────────────────────────────────────────────── */
+.screen--center { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; }
+.brand { font-size: 26px; font-weight: 700; color: #e2e8f0; text-align: center; }
+.muted { color: #64748b; font-size: 14px; }
+.login-form { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; margin-top: 8px; }
+.input { background: #1a2a3a; border: 1px solid #2a3a50; border-radius: 8px; color: #e2e8f0; font-size: 14px; padding: 11px 12px; }
+.btn--primary { background: #7dd3fc; border: none; border-radius: 8px; color: #0f1923; cursor: pointer; font-size: 14px; font-weight: 700; padding: 11px 0; }
+.btn--primary:disabled { opacity: .5; cursor: default; }
+.error { color: #f87171; font-size: 13px; }
+.loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #64748b; }

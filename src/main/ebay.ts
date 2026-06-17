@@ -35,7 +35,7 @@ export async function fetchEbayPrices(pokemonName: string): Promise<EbayPriceDat
 
   const response = await fetch(
     `https://api.ebay.com/buy/browse/v1/item_summary/search?q=${query}&limit=50&filter=buyingOptions%3A%7BFIXED_PRICE%7D`,
-    { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
+    { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'X-EBAY-C-MARKETPLACE-ID': 'EBAY_AU' } }
   )
 
   if (!response.ok) throw new EbayError('eBay search request failed')

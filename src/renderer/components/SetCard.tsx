@@ -19,6 +19,7 @@ export function SetCard({ set, isOwned, onClick }: Props) {
           src={set.imageUrl ?? fallbackImage}
           alt={set.pokemonName}
           className="set-card__image"
+          referrerPolicy="no-referrer"
           onError={(e) => { (e.currentTarget as HTMLImageElement).src = fallbackImage }}
         />
       </div>

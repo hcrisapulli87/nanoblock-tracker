@@ -1,0 +1,8 @@
+node_modules
+dist
+dist-ssr
+.env
+*.local
+# Derived: copied from ../src/shared by scripts/sync-shared.mjs
+src/shared
+dev-dist

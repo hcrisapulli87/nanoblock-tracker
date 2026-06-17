@@ -10,6 +10,8 @@ export default defineConfig({
   },
   renderer: {
     root: 'src/renderer',
+    // Expose VITE_* (e.g. Supabase URL/key) to the renderer in electron-vite.
+    envPrefix: ['VITE_', 'RENDERER_VITE_'],
     build: { rollupOptions: { input: 'src/renderer/index.html' } },
     plugins: [react()],
   },

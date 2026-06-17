@@ -29,23 +29,8 @@ export type PriceResult =
   | { source: 'ebay' | 'nanoblock'; status: 'not-found' }
 
 export const IPC = {
-  GET_COLLECTION: 'collection:get',
-  ADD_TO_COLLECTION: 'collection:add',
-  UPDATE_COLLECTION_ENTRY: 'collection:update',
-  REMOVE_FROM_COLLECTION: 'collection:remove',
   FETCH_EBAY_PRICES: 'prices:ebay',
   FETCH_NANOBLOCK_PRICE: 'prices:nanoblock',
   OPEN_EXTERNAL: 'shell:openExternal',
-  MOBILE_GET_SERVER_STATUS: 'mobile:getServerStatus',
-  MOBILE_GET_TUNNEL_STATUS: 'mobile:getTunnelStatus',
-  MOBILE_GET_TUNNEL_URL: 'mobile:getTunnelUrl',
-  MOBILE_SET_PIN: 'mobile:setPin',
-  MOBILE_SET_TUNNEL_CONFIG: 'mobile:setTunnelConfig',
+  GET_LEGACY_ROWS: 'migration:getLegacyRows',
 } as const
-
-export interface MobileConfig {
-  pinHash: string
-  cookieSecret: string
-  tunnelName: string
-  tunnelUrl: string
-}

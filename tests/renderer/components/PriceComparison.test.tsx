@@ -7,7 +7,7 @@ import type { PriceResult } from '../../../src/shared/types'
 const ebaySuccess: PriceResult = {
   source: 'ebay',
   status: 'success',
-  data: { lowestPrice: 10, averagePrice: 20, highestPrice: 30, currency: 'USD' },
+  data: { lowestPrice: 10, averagePrice: 20, highestPrice: 30, currency: 'AUD' },
 }
 
 const nanoblockSuccess: PriceResult = {

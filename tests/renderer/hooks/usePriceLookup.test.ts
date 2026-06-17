@@ -24,7 +24,7 @@ beforeEach(() => {
 
 describe('usePriceLookup', () => {
   it('starts with loading state for both sources', () => {
-    const { result } = renderHook(() => usePriceLookup('Bulbasaur'))
+    const { result } = renderHook(() => usePriceLookup('Bulbasaur', 'NBPM-003'))
     expect(result.current.ebay.status).toBe('loading')
     expect(result.current.nanoblock.status).toBe('loading')
   })
@@ -32,7 +32,7 @@ describe('usePriceLookup', () => {
   it('transitions eBay to success on resolved fetch', async () => {
     mockAPI.fetchEbayPrices.mockResolvedValue({ ok: true, data: mockEbayData })
     mockAPI.fetchNanoblockPrice.mockResolvedValue({ ok: true, data: 24.99 })
-    const { result } = renderHook(() => usePriceLookup('Bulbasaur'))
+    const { result } = renderHook(() => usePriceLookup('Bulbasaur', 'NBPM-003'))
     await act(async () => {})
     expect(result.current.ebay.status).toBe('success')
     expect(result.current.ebay.data).toEqual(mockEbayData)
@@ -41,7 +41,7 @@ describe('usePriceLookup', () => {
   it('transitions eBay to error on failed fetch', async () => {
     mockAPI.fetchEbayPrices.mockResolvedValue({ ok: false, message: 'eBay API key not configured' })
     mockAPI.fetchNanoblockPrice.mockResolvedValue({ ok: true, data: 24.99 })
-    const { result } = renderHook(() => usePriceLookup('Bulbasaur'))
+    const { result } = renderHook(() => usePriceLookup('Bulbasaur', 'NBPM-003'))
     await act(async () => {})
     expect(result.current.ebay.status).toBe('error')
     expect(result.current.ebay.errorMessage).toBe('eBay API key not configured')
@@ -50,7 +50,7 @@ describe('usePriceLookup', () => {
   it('nanoblock succeeds independently even if eBay fails', async () => {
     mockAPI.fetchEbayPrices.mockResolvedValue({ ok: false, message: 'No listings' })
     mockAPI.fetchNanoblockPrice.mockResolvedValue({ ok: true, data: 19.99 })
-    const { result } = renderHook(() => usePriceLookup('Bulbasaur'))
+    const { result } = renderHook(() => usePriceLookup('Bulbasaur', 'NBPM-003'))
     await act(async () => {})
     expect(result.current.nanoblock.status).toBe('success')
     expect(result.current.nanoblock.data).toBe(19.99)

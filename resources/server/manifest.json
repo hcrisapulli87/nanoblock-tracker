@@ -1,8 +1,0 @@
-{
-  "name": "Nanoblock Tracker",
-  "short_name": "Nanoblock",
-  "display": "standalone",
-  "background_color": "#0f1923",
-  "theme_color": "#0f1923",
-  "start_url": "/"
-}

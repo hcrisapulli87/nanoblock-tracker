@@ -8,8 +8,8 @@ interface Props {
   onBuyLink: (url: string) => void
 }
 
-function fmt(price: number, currency = 'USD') {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price)
+function fmt(price: number, currency = 'AUD') {
+  return new Intl.NumberFormat('en-AU', { style: 'currency', currency }).format(price)
 }
 
 function EbayRow({ result }: { result: PriceResult }) {

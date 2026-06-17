@@ -5,33 +5,77 @@ export class ScraperError extends Error {
   }
 }
 
-export async function fetchNanoblockPrice(pokemonName: string): Promise<number> {
-  const url = `https://www.nanoblock.com/search?q=${encodeURIComponent(pokemonName)}`
+interface ShopifyVariant {
+  price: number
+  sku: string
+}
+
+interface ShopifyProduct {
+  variants: ShopifyVariant[]
+}
+
+function extractShopifyMeta(html: string): { products: ShopifyProduct[] } | null {
+  const marker = 'var meta = '
+  const start = html.indexOf(marker)
+  if (start === -1) return null
+
+  const jsonStart = start + marker.length
+  let depth = 0
+  let i = jsonStart
+  while (i < html.length) {
+    if (html[i] === '{') depth++
+    else if (html[i] === '}') {
+      depth--
+      if (depth === 0) break
+    }
+    i++
+  }
+
+  try {
+    return JSON.parse(html.slice(jsonStart, i + 1)) as { products: ShopifyProduct[] }
+  } catch {
+    return null
+  }
+}
+
+async function convertSgdToAud(sgdAmount: number): Promise<number> {
+  const res = await fetch('https://open.er-api.com/v6/latest/SGD')
+  if (!res.ok) throw new ScraperError('Could not fetch SGD/AUD exchange rate')
+  const data = await res.json() as { rates: Record<string, number> }
+  const rate = data.rates?.AUD
+  if (!rate) throw new ScraperError('AUD rate missing from exchange rate response')
+  return Math.round(sgdAmount * rate * 100) / 100
+}
+
+export async function fetchNanoblockPrice(setCode: string): Promise<number> {
+  const url = `https://www.nanoblock.com.sg/search?q=${encodeURIComponent(setCode)}&type=product`
   const response = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; NanoblockTracker/1.0)' },
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' },
   })
 
-  if (!response.ok) throw new ScraperError(`Nanoblock site returned ${response.status}`)
+  if (!response.ok) throw new ScraperError(`nanoblock.com.sg returned ${response.status}`)
 
   const html = await response.text()
+  const meta = extractShopifyMeta(html)
 
-  // Try JSON-LD structured data first (most reliable)
-  const ldMatch = html.match(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)
-  if (ldMatch) {
-    for (const block of ldMatch) {
-      try {
-        const json = JSON.parse(block.replace(/<\/?script[^>]*>/gi, '').trim()) as Record<string, unknown>
-        const offers = (json['offers'] ?? (json['@graph'] && (json['@graph'] as Record<string, unknown>[])[0]?.['offers'])) as Record<string, string> | undefined
-        if (offers?.['price']) return parseFloat(offers['price'])
-      } catch {
-        // malformed JSON-LD — try next block
+  if (!meta?.products?.length) {
+    throw new ScraperError('No listings found on nanoblock.com.sg')
+  }
+
+  // Prefer an exact SKU match for the NBPM set code
+  for (const product of meta.products) {
+    for (const variant of product.variants) {
+      if (variant.sku === setCode) {
+        return convertSgdToAud(variant.price / 100)
       }
     }
   }
 
-  // Fallback: look for a price pattern near currency symbols
-  const priceMatch = html.match(/\$(\d+\.\d{2})/)
-  if (priceMatch) return parseFloat(priceMatch[1])
+  // Fallback: use the first product's price if no exact SKU match
+  const fallbackPrice = meta.products[0]?.variants[0]?.price
+  if (fallbackPrice !== undefined) {
+    return convertSgdToAud(fallbackPrice / 100)
+  }
 
-  throw new ScraperError('Could not find retail price on nanoblock.com')
+  throw new ScraperError('Could not extract price from nanoblock.com.sg')
 }

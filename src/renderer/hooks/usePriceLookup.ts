@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import type { PriceResult, EbayPriceData } from '../../shared/types'
 
-export function usePriceLookup(pokemonName: string) {
+export function usePriceLookup(pokemonName: string, setCode: string) {
   const [ebay, setEbay] = useState<PriceResult>({ source: 'ebay', status: 'loading' })
   const [nanoblock, setNanoblock] = useState<PriceResult>({ source: 'nanoblock', status: 'loading' })
 
   useEffect(() => {
-    if (!pokemonName) return
+    if (!pokemonName || !setCode) return
 
     let cancelled = false
 
@@ -22,7 +22,7 @@ export function usePriceLookup(pokemonName: string) {
       }
     })
 
-    window.electronAPI.fetchNanoblockPrice(pokemonName).then(res => {
+    window.electronAPI.fetchNanoblockPrice(setCode).then(res => {
       if (cancelled) return
       if (res.ok) {
         setNanoblock({ source: 'nanoblock', status: 'success', data: res.data as number })
@@ -32,7 +32,7 @@ export function usePriceLookup(pokemonName: string) {
     })
 
     return () => { cancelled = true }
-  }, [pokemonName])
+  }, [pokemonName, setCode])
 
   return { ebay, nanoblock }
 }
