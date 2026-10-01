@@ -20,7 +20,7 @@ export function useCollection() {
     // Realtime: changes from the desktop (or another phone) re-read the table within ~1s.
     const channel = supabase
       .channel('collection-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'collection' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'nanoblock_collection' }, () => {
         void reload()
       })
       .subscribe()

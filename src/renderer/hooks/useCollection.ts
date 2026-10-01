@@ -38,7 +38,7 @@ export function useCollection() {
     // desktop reflects changes made on the phone (and vice versa) within ~1s.
     const channel = supabase
       .channel('collection-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'collection' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'nanoblock_collection' }, () => {
         void reload()
       })
       .subscribe()

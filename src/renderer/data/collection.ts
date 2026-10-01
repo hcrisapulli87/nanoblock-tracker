@@ -24,26 +24,26 @@ export function deriveOwnedIds(entries: CollectionEntry[]): Set<string> {
 }
 
 export async function fetchCollection(): Promise<CollectionEntry[]> {
-  const { data, error } = await supabase.from('collection').select('*').order('set_id')
+  const { data, error } = await supabase.from('nanoblock_collection').select('*').order('set_id')
   if (error) throw error
   return (data as CollectionRow[]).map(rowToEntry)
 }
 
 export async function insertEntry(entry: CollectionEntry): Promise<void> {
-  const { error } = await supabase.from('collection').insert(entryToRow(entry))
+  const { error } = await supabase.from('nanoblock_collection').insert(entryToRow(entry))
   if (error) throw error
 }
 
 export async function updateEntry(entry: CollectionEntry): Promise<void> {
   const { error } = await supabase
-    .from('collection')
+    .from('nanoblock_collection')
     .update({ condition: entry.condition, notes: entry.notes })
     .eq('set_id', entry.setId)
   if (error) throw error
 }
 
 export async function deleteEntry(setId: string): Promise<void> {
-  const { error } = await supabase.from('collection').delete().eq('set_id', setId)
+  const { error } = await supabase.from('nanoblock_collection').delete().eq('set_id', setId)
   if (error) throw error
 }
 
@@ -51,7 +51,7 @@ export async function deleteEntry(setId: string): Promise<void> {
 export async function upsertEntries(entries: CollectionEntry[]): Promise<void> {
   if (entries.length === 0) return
   const { error } = await supabase
-    .from('collection')
+    .from('nanoblock_collection')
     .upsert(entries.map(entryToRow), { onConflict: 'owner_id,set_id', ignoreDuplicates: true })
   if (error) throw error
 }
