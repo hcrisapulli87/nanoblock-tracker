@@ -9,15 +9,17 @@ export function registerIpcHandlers(): void {
     try {
       return { ok: true, data: await fetchEbayPrices(pokemonName) }
     } catch (e) {
-      return { ok: false, message: e instanceof EbayError ? e.message : 'Unknown eBay error' }
+      if (e instanceof EbayError) return { ok: false, message: e.message, notFound: e.notFound }
+      return { ok: false, message: 'Unknown eBay error' }
     }
   })
 
-  ipcMain.handle(IPC.FETCH_NANOBLOCK_PRICE, async (_e, pokemonName: string) => {
+  ipcMain.handle(IPC.FETCH_NANOBLOCK_PRICE, async (_e, setCode: string) => {
     try {
-      return { ok: true, data: await fetchNanoblockPrice(pokemonName) }
+      return { ok: true, data: await fetchNanoblockPrice(setCode) }
     } catch (e) {
-      return { ok: false, message: e instanceof ScraperError ? e.message : 'Scrape failed' }
+      if (e instanceof ScraperError) return { ok: false, message: e.message, notFound: e.notFound }
+      return { ok: false, message: 'Scrape failed' }
     }
   })
 

@@ -23,7 +23,7 @@ function EbayRow({ result }: { result: PriceResult }) {
       <span className="price-row__label">Secondary market</span>
       <div className="price-row__values">
         <span>Low: <strong>{fmt(d.lowestPrice, d.currency)}</strong></span>
-        <span>Avg: <strong>{fmt(d.averagePrice, d.currency)}</strong></span>
+        <span>Typical: <strong>{fmt(d.averagePrice, d.currency)}</strong></span>
         <span>High: <strong>{fmt(d.highestPrice, d.currency)}</strong></span>
       </div>
     </div>
@@ -33,7 +33,7 @@ function EbayRow({ result }: { result: PriceResult }) {
 function NanoblockRow({ result }: { result: PriceResult }) {
   if (result.status === 'loading') return <p className="price-row__loading">Loading retail price...</p>
   if (result.status === 'error') return <p className="price-row__error">{result.errorMessage}</p>
-  if (result.status === 'not-found') return <p className="price-row__empty">Retail price unavailable</p>
+  if (result.status === 'not-found') return <p className="price-row__empty">Not stocked at Nanoblock SG</p>
   // status === 'success', data is guaranteed by discriminated union
   const price = result.data as number
   return (

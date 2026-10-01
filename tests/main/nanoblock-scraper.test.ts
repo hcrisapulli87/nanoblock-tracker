@@ -37,18 +37,32 @@ describe('fetchNanoblockPrice', () => {
     expect(result).toBe(17.81)
   })
 
-  it('falls back to first product when no exact SKU match', async () => {
+  it('does not guess a price when no product has the exact SKU', async () => {
+    // The store's search is fuzzy: a query for an unstocked set returns other sets.
+    // Their prices must not be shown as this set's retail price.
     const products = [
       { variants: [{ price: 1990, sku: 'NBPM-005' }] },
       { variants: [{ price: 2490, sku: 'NBPM-010' }] },
     ]
-    mockFetch
-      .mockResolvedValueOnce(shopifyHtml(products))
-      .mockResolvedValueOnce(RATE_RESPONSE)
+    mockFetch.mockResolvedValueOnce(shopifyHtml(products))
 
-    const result = await fetchNanoblockPrice('NBPM-999')
-    // S$19.90 * 1.12 = A$22.288 → A$22.29
-    expect(result).toBe(22.29)
+    const err = await fetchNanoblockPrice('NBPM-999').catch(e => e)
+    expect(err).toBeInstanceOf(ScraperError)
+    expect(err.notFound).toBe(true)
+    expect(mockFetch).toHaveBeenCalledTimes(1) // no exchange-rate call
+  })
+
+  it('marks an empty search as not-found rather than a failure', async () => {
+    mockFetch.mockResolvedValueOnce(shopifyHtml([]))
+    const err = await fetchNanoblockPrice('NBPM-001').catch(e => e)
+    expect(err.notFound).toBe(true)
+  })
+
+  it('treats a non-200 response as a real failure, not not-found', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 503 })
+    const err = await fetchNanoblockPrice('NBPM-001').catch(e => e)
+    expect(err).toBeInstanceOf(ScraperError)
+    expect(err.notFound).toBe(false)
   })
 
   it('throws ScraperError when no products found', async () => {

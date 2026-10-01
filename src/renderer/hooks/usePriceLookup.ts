@@ -17,6 +17,8 @@ export function usePriceLookup(pokemonName: string, setCode: string) {
       if (cancelled) return
       if (res.ok) {
         setEbay({ source: 'ebay', status: 'success', data: res.data as EbayPriceData })
+      } else if (res.notFound) {
+        setEbay({ source: 'ebay', status: 'not-found' })
       } else {
         setEbay({ source: 'ebay', status: 'error', errorMessage: res.message })
       }
@@ -26,6 +28,8 @@ export function usePriceLookup(pokemonName: string, setCode: string) {
       if (cancelled) return
       if (res.ok) {
         setNanoblock({ source: 'nanoblock', status: 'success', data: res.data as number })
+      } else if (res.notFound) {
+        setNanoblock({ source: 'nanoblock', status: 'not-found' })
       } else {
         setNanoblock({ source: 'nanoblock', status: 'error', errorMessage: res.message })
       }

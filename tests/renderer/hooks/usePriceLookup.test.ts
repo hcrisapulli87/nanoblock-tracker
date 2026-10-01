@@ -47,6 +47,15 @@ describe('usePriceLookup', () => {
     expect(result.current.ebay.errorMessage).toBe('eBay API key not configured')
   })
 
+  it('shows not-found (not an error) when a source has no listing for the set', async () => {
+    mockAPI.fetchEbayPrices.mockResolvedValue({ ok: false, message: 'No listings found on eBay', notFound: true })
+    mockAPI.fetchNanoblockPrice.mockResolvedValue({ ok: false, message: 'Not stocked', notFound: true })
+    const { result } = renderHook(() => usePriceLookup('Sprigatito (RS)', 'NBPM-R01'))
+    await act(async () => {})
+    expect(result.current.ebay.status).toBe('not-found')
+    expect(result.current.nanoblock.status).toBe('not-found')
+  })
+
   it('nanoblock succeeds independently even if eBay fails', async () => {
     mockAPI.fetchEbayPrices.mockResolvedValue({ ok: false, message: 'No listings' })
     mockAPI.fetchNanoblockPrice.mockResolvedValue({ ok: true, data: 19.99 })

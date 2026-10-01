@@ -1,5 +1,7 @@
 export class ScraperError extends Error {
-  constructor(message: string) {
+  // notFound = the store simply doesn't stock this set (shown as "unavailable"),
+  // as opposed to a real failure (network, page format change).
+  constructor(message: string, readonly notFound = false) {
     super(message)
     this.name = 'ScraperError'
   }
@@ -58,11 +60,14 @@ export async function fetchNanoblockPrice(setCode: string): Promise<number> {
   const html = await response.text()
   const meta = extractShopifyMeta(html)
 
-  if (!meta?.products?.length) {
-    throw new ScraperError('No listings found on nanoblock.com.sg')
+  // No meta block at all = the store's page format changed, which is a real failure.
+  if (!meta) throw new ScraperError('Could not read nanoblock.com.sg search page')
+  if (!meta.products?.length) {
+    throw new ScraperError('Not stocked on nanoblock.com.sg', true)
   }
 
-  // Prefer an exact SKU match for the NBPM set code
+  // Exact SKU match only. The store search is fuzzy, so for a set it doesn't stock
+  // (e.g. the RS series) it returns other sets — never show their price as this one's.
   for (const product of meta.products) {
     for (const variant of product.variants) {
       if (variant.sku === setCode) {
@@ -71,11 +76,5 @@ export async function fetchNanoblockPrice(setCode: string): Promise<number> {
     }
   }
 
-  // Fallback: use the first product's price if no exact SKU match
-  const fallbackPrice = meta.products[0]?.variants[0]?.price
-  if (fallbackPrice !== undefined) {
-    return convertSgdToAud(fallbackPrice / 100)
-  }
-
-  throw new ScraperError('Could not extract price from nanoblock.com.sg')
+  throw new ScraperError('Not stocked on nanoblock.com.sg', true)
 }

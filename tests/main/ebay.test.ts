@@ -15,7 +15,8 @@ const searchResponse = (items: unknown[]) => ({
   json: async () => ({ itemSummaries: items }),
 })
 
-const makeItem = (price: string) => ({
+const makeItem = (price: string, title = 'nanoblock Pokemon Bulbasaur NBPM-002') => ({
+  title,
   buyingOptions: ['FIXED_PRICE'],
   price: { value: price, currency: 'USD' },
 })
@@ -27,7 +28,7 @@ beforeEach(() => {
 })
 
 describe('fetchEbayPrices', () => {
-  it('returns lowest, average, highest from active listings', async () => {
+  it('returns lowest, typical (median), highest from active listings', async () => {
     mockFetch
       .mockResolvedValueOnce(tokenResponse)
       .mockResolvedValueOnce(searchResponse([
@@ -38,9 +39,55 @@ describe('fetchEbayPrices', () => {
 
     const result = await fetchEbayPrices('Bulbasaur')
     expect(result.lowestPrice).toBe(10)
-    expect(result.averagePrice).toBeCloseTo(20)
+    expect(result.averagePrice).toBe(20)
     expect(result.highestPrice).toBe(30)
     expect(result.currency).toBe('USD')
+  })
+
+  it('uses the median so one overpriced listing does not drag the typical price', async () => {
+    mockFetch
+      .mockResolvedValueOnce(tokenResponse)
+      .mockResolvedValueOnce(searchResponse([
+        makeItem('20.00'), makeItem('22.00'), makeItem('24.00'), makeItem('26.00'), makeItem('400.00'),
+      ]))
+
+    const result = await fetchEbayPrices('Bulbasaur')
+    expect(result.averagePrice).toBe(24)
+  })
+
+  it('ignores lots, bundles and instruction-only listings', async () => {
+    mockFetch
+      .mockResolvedValueOnce(tokenResponse)
+      .mockResolvedValueOnce(searchResponse([
+        makeItem('25.00'),
+        makeItem('180.00', 'Nanoblock Pokemon LOT of 8 sets Bulbasaur Charmander'),
+        makeItem('150.00', 'Pokemon nanoblock bundle x5'),
+        makeItem('3.00', 'Bulbasaur nanoblock instructions only'),
+      ]))
+
+    const result = await fetchEbayPrices('Bulbasaur')
+    expect(result.lowestPrice).toBe(25)
+    expect(result.highestPrice).toBe(25)
+  })
+
+  it('searches without catalog suffixes like (Deluxe) or (RS)', async () => {
+    mockFetch
+      .mockResolvedValueOnce(tokenResponse)
+      .mockResolvedValueOnce(searchResponse([makeItem('25.00')]))
+
+    await fetchEbayPrices('Charizard (Mega X RS)')
+    const searchUrl = mockFetch.mock.calls[1][0] as string
+    expect(decodeURIComponent(searchUrl)).toContain('q=Charizard Mega X RS nanoblock')
+  })
+
+  it('marks no listings as not-found', async () => {
+    mockFetch
+      .mockResolvedValueOnce(tokenResponse)
+      .mockResolvedValueOnce(searchResponse([]))
+
+    const err = await fetchEbayPrices('Bulbasaur').catch(e => e)
+    expect(err).toBeInstanceOf(EbayError)
+    expect(err.notFound).toBe(true)
   })
 
   it('throws EbayError when no listings found', async () => {
