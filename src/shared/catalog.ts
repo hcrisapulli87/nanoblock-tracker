@@ -194,6 +194,12 @@ export const CATALOG: NanoblockSet[] = [
   { id: 'NBPM-110', pokemonName: 'Jigglypuff', pokemonNumber: 39, generation: 1, setCode: 'NBPM-110', imageUrl: nbImage('NBPM-110') },
   { id: 'NBPM-111', pokemonName: 'Machamp',    pokemonNumber: 68, generation: 1, setCode: 'NBPM-111', imageUrl: nbImage('NBPM-111') },
 
+  // ── NBPM-113: Zygarde Perfect Forme Deluxe (August 2026) ───────────────────
+  // NBPM-112 is the Poké Ball collection stand (July 2026) — an accessory, not a Pokémon, so
+  // it's left out (the catalog is keyed on Pokédex number/generation).
+  // Merlinsbricks doesn't list NBPM-113 yet — product photo from the Kawada catalog.
+  { id: 'NBPM-113', pokemonName: 'Zygarde (Perfect Forme Deluxe)', pokemonNumber: 718, generation: 6, setCode: 'NBPM-113', imageUrl: kawada('2026/06/4972825236970') },
+
   // ── RS Series (Round Style — new diagonal/curved piece format, 2024-2026) ───
   // Merlinsbricks doesn't carry the RS series — product photos from Kawada official catalog.
   // Paldea Starters Wave (July 2024)
